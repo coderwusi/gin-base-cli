@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/sirupsen/logrus"
 )
 
 func RedisClient() {
@@ -16,7 +17,7 @@ func RedisClient() {
 	})
 	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		fmt.Println("redis连接失败：", err)
+		logrus.WithError(err).Error("FindArticle - model")
 	} else {
 		fmt.Println("redis连接成功")
 	}

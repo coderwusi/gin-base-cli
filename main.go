@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-
+	setting.LogInit()
 	setting.Init()                            //读取环境配置
 	model.MysqlInit(setting.Conf.MySQLConfig) //连接mysql
 	setting.RedisClient()                     //连接redis
