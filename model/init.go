@@ -24,14 +24,14 @@ func MysqlInit(config *setting.MySQLConfig) {
 		SkipInitializeWithVersion: false, // 根据当前 MySQL 版本自动配置
 	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
-		fmt.Println("数据库连接错误：", err)
+		fmt.Println("mysql数据库连接错误：", err)
 		return
 	}
 
 	if err := DB.AutoMigrate(); err != nil {
-		fmt.Println("数据库迁移错误：", err)
+		fmt.Println("mysql数据库迁移错误：", err)
 		return
 	}
 
-	fmt.Println("success")
+	fmt.Println("Mysql连接成功")
 }

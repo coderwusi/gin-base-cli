@@ -36,7 +36,7 @@ func Init() {
 		fmt.Printf("viper.Unmarshal failed, err:%v\n", err)
 		return
 	} //捕捉viper反序列化错误
-
-	fmt.Println(Conf.MySQLConfig)
+	//
+	fmt.Println("config.yaml读取反序列化成功")
 
 }
