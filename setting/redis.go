@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 func RedisClient() {
@@ -17,7 +17,7 @@ func RedisClient() {
 	})
 	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		logrus.WithError(err).Error("FindArticle - model")
+		zap.L().Error("redis数据库连接错误:", zap.Error(err))
 	} else {
 		fmt.Println("redis连接成功")
 	}

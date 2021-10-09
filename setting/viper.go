@@ -3,12 +3,23 @@ package setting
 import (
 	"fmt"
 	"github.com/spf13/viper" //第三方配置管理神器
+	"log"
 )
 
 var Conf = new(TotalConfig)
 
 type TotalConfig struct {
+	Mode         string `mapstructure:"mode"`
 	*MySQLConfig `mapstructure:"mysql"`
+	*LogConfig   `mapstructure:"log"`
+}
+
+type LogConfig struct {
+	Level      string `mapstructure:"level"`
+	Filename   string `mapstructure:"filename"`
+	MaxSize    int    `mapstructure:"max_size"`
+	MaxAge     int    `mapstructure:"max_age"`
+	MaxBackups int    `mapstructure:"max_backups"`
 }
 
 type MySQLConfig struct {
@@ -22,21 +33,19 @@ type MySQLConfig struct {
 	MaxIdleConns int    `mapstructure:"max_idle_conns"`
 }
 
-func Init() {
+func ViperInit() {
+	log.SetFlags(log.LstdFlags | log.Llongfile) //log显示行号
 
 	viper.SetConfigFile("config.yaml") //读取配置
 	//viper.AddConfigPath("./")
 
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("viper.ReadInConfig failed, err:%v\n", err)
-		return
+		log.Fatalln("viper.ReadInConfig failed, err:", err)
 	} //捕捉viper读取错误
 
 	if err := viper.Unmarshal(Conf); err != nil {
-		fmt.Printf("viper.Unmarshal failed, err:%v\n", err)
-		return
+		log.Fatalln("viper.Unmarshal failed, err:", err)
 	} //捕捉viper反序列化错误
 	//
-	fmt.Println("config.yaml读取反序列化成功")
-
+	fmt.Println("config.yaml读取、反序列化成功")
 }

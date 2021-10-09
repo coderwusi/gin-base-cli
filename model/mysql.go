@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"gin-base-cli/setting"
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -24,12 +25,12 @@ func MysqlInit(config *setting.MySQLConfig) {
 		SkipInitializeWithVersion: false, // 根据当前 MySQL 版本自动配置
 	}), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	if err != nil {
-		fmt.Println("mysql数据库连接错误：", err)
+		zap.L().Fatal("mysql数据库连接错误:", zap.Error(err))
 		return
 	}
 
 	if err := DB.AutoMigrate(); err != nil {
-		fmt.Println("mysql数据库迁移错误：", err)
+		zap.L().Fatal("mysql数据库迁移错误:", zap.Error(err))
 		return
 	}
 

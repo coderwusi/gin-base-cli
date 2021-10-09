@@ -9,12 +9,12 @@ import (
 )
 
 func main() {
-	setting.LogInit()
-	setting.Init()                            //读取环境配置
-	model.MysqlInit(setting.Conf.MySQLConfig) //连接mysql
-	setting.RedisClient()                     //连接redis
-	r := gin.Default()                        //默认使用Logger(), Recovery()
-	r.Use(middleware.Cors())                  //启用跨域
+	setting.ViperInit()                                        //读取环境配置
+	setting.LogInit(setting.Conf.LogConfig, setting.Conf.Mode) //日志加载成功
+	model.MysqlInit(setting.Conf.MySQLConfig)                  //连接mysql
+	//setting.RedisClient()                     //连接redis
+	r := gin.Default()       //默认使用Logger(), Recovery()
+	r.Use(middleware.Cors()) //启用跨域
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",

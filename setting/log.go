@@ -2,26 +2,57 @@ package setting
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"github.com/natefinch/lumberjack"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"log"
 	"os"
-	"time"
 )
 
-var log = logrus.New()
+var lg *zap.Logger
 
-func LogInit() {
-	file, err := os.OpenFile("./logs/logon_"+time.Now().Format("2006-01-02")+".log", os.O_WRONLY|os.O_APPEND|os.O_SYNC|os.O_CREATE|os.O_RDWR, 0766)
-	fmt.Println(err)
+func LogInit(cfg *LogConfig, mode string) {
+	writeSyncer := getLogWriter(cfg.Filename, cfg.MaxSize, cfg.MaxBackups, cfg.MaxAge)
+	encoder := getEncoder()
+	var l = new(zapcore.Level)
+	var err error
+	err = l.UnmarshalText([]byte(cfg.Level))
 	if err != nil {
-		logrus.Fatal("log init failed")
+		log.Fatalln("日志加载错误：", err)
+	}
+	var core zapcore.Core
+	if mode == "dev" {
+		consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+		core = zapcore.NewTee(
+			zapcore.NewCore(encoder, writeSyncer, l),
+			zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stdout), zapcore.DebugLevel),
+		)
+	} else {
+		core = zapcore.NewCore(encoder, writeSyncer, l)
+	}
 
+	lg = zap.New(core, zap.AddCaller())
+
+	zap.ReplaceGlobals(lg)
+	fmt.Println("日志加载成功")
+}
+
+func getEncoder() zapcore.Encoder {
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoderConfig.TimeKey = "time"
+	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	encoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
+	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
+	return zapcore.NewConsoleEncoder(encoderConfig)
+}
+
+func getLogWriter(filename string, maxSize, maxBackup, maxAge int) zapcore.WriteSyncer {
+	lumberJackLogger := &lumberjack.Logger{
+		Filename:   filename,
+		MaxSize:    maxSize,
+		MaxBackups: maxBackup,
+		MaxAge:     maxAge,
 	}
-	if err == nil {
-		log.Out = file
-	}
-	//log.WithFields(logrus.Fields{
-	//	"animal": "walrus",
-	//	"size": 10,
-	//}).Info("blog log")
-	//file.Close()
+	return zapcore.AddSync(lumberJackLogger)
 }
